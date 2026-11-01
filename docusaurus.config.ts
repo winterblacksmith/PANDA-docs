@@ -7,7 +7,7 @@ const config: Config = {
   tagline: 'PERSEUS AI for Natural-language Data Analysis',
   favicon: 'img/canopy-leaf.svg',
   future: {v4: true},
-  url: process.env.DOCS_URL ?? 'https://perseus-panda-docs.up.railway.app',
+  url: process.env.DOCS_URL ?? 'https://panda-docs.up.railway.app',
   baseUrl: process.env.DOCS_BASE_URL ?? '/',
   organizationName: 'winterblacksmith',
   projectName: 'PANDA-docs',
@@ -33,6 +33,7 @@ const config: Config = {
       logo: {alt: 'PANDA forestry AI', src: 'img/canopy-leaf.svg'},
       items: [
         {type: 'docSidebar', sidebarId: 'pandaSidebar', position: 'left', label: 'Documentation'},
+        {to: '/docs/faq', label: 'FAQ', position: 'left'},
         {to: '/docs/architecture/system-overview', label: 'Architecture', position: 'left'},
         {to: '/docs/handoff/project-handoff', label: 'Handoff', position: 'left'},
         {href: 'https://github.com/winterblacksmith/PANDA', label: 'GitHub', position: 'right'},
@@ -43,6 +44,7 @@ const config: Config = {
       links: [
         {title: 'Documentation', items: [
           {label: 'PANDA overview', to: '/docs/overview'},
+          {label: 'FAQ', to: '/docs/faq'},
           {label: 'System architecture', to: '/docs/architecture/system-overview'},
           {label: 'Testing and troubleshooting', to: '/docs/operations/testing-troubleshooting'},
         ]},

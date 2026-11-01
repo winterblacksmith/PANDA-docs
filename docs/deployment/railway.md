@@ -6,6 +6,8 @@ description: Connect the hosted PANDA interface to its private inference gateway
 
 # Railway application deployment
 
+> **Integration status:** The checked Railway application branch starts Streamlit and connects through the Ollama client using `OLLAMA_HOST`. The gateway variables below describe the separate gateway integration target; that branch does not yet read them. A healthy Streamlit endpoint does not confirm gateway or model readiness.
+
 Railway hosts PANDA's public-facing application. The application can still provide deterministic SQL and spatial results when the model is unavailable, but natural-language generation requires the Irene gateway.
 
 ## Required application variables

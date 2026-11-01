@@ -3,6 +3,7 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   pandaSidebar: [
     {type: 'doc', id: 'overview', label: 'PANDA overview'},
+    {type: 'doc', id: 'faq', label: 'FAQ'},
     {type: 'doc', id: 'implementation-walkthrough', label: 'Implementation walkthrough'},
     {type: 'category', label: 'Getting started', items: ['getting-started/local-setup']},
     {type: 'category', label: 'Architecture', items: [

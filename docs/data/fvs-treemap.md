@@ -45,7 +45,7 @@ FVS SQL row
 
 ## The complete TreeMap package
 
-Canopy uses the packaged raster under `rasters/TreeMap_2022/`, which contains:
+PANDA uses the packaged raster under `rasters/TreeMap_2022/`, which contains:
 
 - `TreeMap_2022.tif` — the actual GeoTIFF cells;
 - `TreeMap_2022.tfw` — an accompanying world file;
@@ -53,7 +53,7 @@ Canopy uses the packaged raster under `rasters/TreeMap_2022/`, which contains:
 - `TreeMap_2022.tif.xml` — product and lineage metadata; and
 - `TreeMap_2022.tif.vat.dbf` — a value-attribute table describing TreeMap profiles.
 
-The GeoTIFF is one-band, `EPSG:5070` (NAD83 / CONUS Albers), 4,381 × 3,596 cells. Canopy reprojects a downsampled display mask to WGS84 for the interactive web map while keeping nearest-neighbor resampling so categorical codes are not averaged.
+The GeoTIFF is one-band, `EPSG:5070` (NAD83 / CONUS Albers), 4,381 × 3,596 cells. PANDA reprojects a downsampled display mask to WGS84 for the interactive web map while keeping nearest-neighbor resampling so categorical codes are not averaged.
 
 ## Example questions
 
@@ -66,13 +66,13 @@ Chart acres by composition
 How many mature coniferous stands are there?
 ```
 
-For the supervisor's requested age distribution, Canopy groups by exact `Age` and sums `Acres`. This reproduces the intended “Sum of Acres by Age” calculation rather than counting stands.
+For the supervisor's requested age distribution, PANDA groups by exact `Age` and sums `Acres`. This reproduces the intended “Sum of Acres by Age” calculation rather than counting stands.
 
 ![Supplied sum-of-acres-by-age example](/img/sum-acres-by-age.png)
 
 ## What the supervisor's data adds
 
-This package materially advances Canopy because it provides a realistic bridge from stand simulation to spatial decision support:
+This package materially advances PANDA because it provides a realistic bridge from stand simulation to spatial decision support:
 
 - natural-language questions can target FVS output variables, not only tree-inventory CSV columns;
 - each result can be shown as its actual management-unit polygon;
@@ -82,6 +82,6 @@ This package materially advances Canopy because it provides a realistic bridge f
 
 ## Interpretation limits
 
-Several stands may share one `TM_Value`. In the supplied data, `Age` and `Age_class` are constant within each TreeMap profile, but composition and volume can vary among stands sharing that code. Canopy therefore highlights raster cells by matching profile code; it does **not** claim that every pixel has a unique `MU_ID` or an unaggregated stand-level `TCuFt`.
+Several stands may share one `TM_Value`. In the supplied data, `Age` and `Age_class` are constant within each TreeMap profile, but composition and volume can vary among stands sharing that code. PANDA therefore highlights raster cells by matching profile code; it does **not** claim that every pixel has a unique `MU_ID` or an unaggregated stand-level `TCuFt`.
 
 For a raster colored by a varying stand field such as `TCuFt`, the method must be declared—for example, acreage-weighted mean `TCuFt` per `TM_Value`. This prevents a plausible-looking map from silently choosing an arbitrary stand value.

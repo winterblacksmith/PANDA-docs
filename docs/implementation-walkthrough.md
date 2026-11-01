@@ -2,21 +2,21 @@
 id: implementation-walkthrough
 title: 2. Implementation walkthrough
 slug: /implementation-walkthrough
-description: A supervisor-ready explanation of how Canopy evolved from CSV and JSON files into a local SQL and spatial-data knowledge base.
+description: A supervisor-ready explanation of how PANDA evolved from CSV and JSON files into a local SQL and spatial-data knowledge base.
 sidebar_position: 2
 ---
 
 # 2. Implementation walkthrough
 
-This section explains the changes made to Canopy, why each change was needed, how it was implemented, and how to demonstrate that it works. It is written so it can be used as the basis of a supervisor presentation.
+This section explains the changes made to PANDA, why each change was needed, how it was implemented, and how to demonstrate that it works. It is written so it can be used as the basis of a supervisor presentation.
 
 ## Short explanation for a supervisor
 
-> I started Canopy as a question-answering interface over CSV and JSON files. That was useful for prototyping, but the data was loaded into memory for each run, query behavior was difficult to prove, and chat history existed only in the current Streamlit session. I changed the architecture so tabular data is synchronized into a local SQLite database and questions are converted into constrained, parameterized SQL queries. I then added persistent SQLite chat tables, imported realistic FVS stand outputs with their complete shapefile, and connected those stands to a packaged TreeMap raster through `TM_Value`. Canopy can now return evidence as SQL results, acreage-weighted charts, stand polygons, and matching raster cells while using a local Qwen model only to interpret or explain verified data.
+> I started PANDA as a question-answering interface over CSV and JSON files. That was useful for prototyping, but the data was loaded into memory for each run, query behavior was difficult to prove, and chat history existed only in the current Streamlit session. I changed the architecture so tabular data is synchronized into a local SQLite database and questions are converted into constrained, parameterized SQL queries. I then added persistent SQLite chat tables, imported realistic FVS stand outputs with their complete shapefile, and connected those stands to a packaged TreeMap raster through `TM_Value`. PANDA can now return evidence as SQL results, acreage-weighted charts, stand polygons, and matching raster cells while using a local Qwen model only to interpret or explain verified data.
 
 ## Before and after
 
-| Earlier prototype | Current Canopy implementation |
+| Earlier prototype | Current PANDA implementation |
 |---|---|
 | CSV and JSON read directly for each session | CSV attributes synchronized into local SQLite tables |
 | Filtering mainly performed in pandas | Parameterized SQL used for deterministic filtering |
@@ -35,7 +35,7 @@ CSV is a useful exchange format, but it is not a query engine. Reading a CSV int
 
 ### How it was implemented
 
-When a CSV dataset is selected, Canopy:
+When a CSV dataset is selected, PANDA:
 
 1. reads the source table with pandas;
 2. creates a safe SQLite table name from the filename;
@@ -47,7 +47,7 @@ The registry records the source name, SQL table name, row count, column count, f
 
 ### How questions become SQL
 
-Canopy does not give the language model unrestricted access to execute arbitrary SQL. The question is converted into a structured specification containing:
+PANDA does not give the language model unrestricted access to execute arbitrary SQL. The question is converted into a structured specification containing:
 
 - an allow-listed column;
 - an allow-listed comparison operator;
@@ -61,7 +61,7 @@ For the question:
 Show stands older than 60 with TCuFt above 3000
 ```
 
-Canopy executes:
+PANDA executes:
 
 ```sql
 SELECT *
@@ -98,7 +98,7 @@ Streamlit session state kept a conversation only while that application session 
 
 ### Current behavior
 
-Canopy stores conversations in two SQLite tables:
+PANDA stores conversations in two SQLite tables:
 
 ```text
 chat_conversations
@@ -116,7 +116,7 @@ chat_messages
 
 Each dataset has its own conversation history. An inventory conversation, FVS conversation, and raster conversation do not overwrite one another.
 
-For calculated FVS responses, Canopy stores the small query specification rather than storing a large dataframe or map image. When a saved chat is reopened, the query is executed again and its chart or map is reconstructed from the source data. This makes the history both persistent and reproducible.
+For calculated FVS responses, PANDA stores the small query specification rather than storing a large dataframe or map image. When a saved chat is reopened, the query is executed again and its chart or map is reconstructed from the source data. This makes the history both persistent and reproducible.
 
 ### How to prove this change
 
@@ -146,7 +146,7 @@ FVS_output_07222026.*.xml     metadata and lineage
 schema.ini                    CSV field interpretation
 ```
 
-These are not extra TIFF files. They are companion parts of the shapefile and should remain together. Canopy preserves the complete package under `data/fvs/`.
+These are not extra TIFF files. They are companion parts of the shapefile and should remain together. PANDA preserves the complete package under `data/fvs/`.
 
 ### What the data contains
 
@@ -168,7 +168,7 @@ Useful measures include `Age`, `Acres`, `TCuFt`, `Tpa`, `BA`, `SDI`, `TopHt`, ow
 SQLite result row -- MU_ID --> shapefile stand polygon
 ```
 
-When a map is requested, Canopy collects the matching `MU_ID` values, reads those shapes, transforms the geometry from `EPSG:5070` to web-map coordinates (`EPSG:4326`), and adds the polygons to a Folium map. Tooltips display the stand identifier and selected attributes.
+When a map is requested, PANDA collects the matching `MU_ID` values, reads those shapes, transforms the geometry from `EPSG:5070` to web-map coordinates (`EPSG:4326`), and adds the polygons to a Folium map. Tooltips display the stand identifier and selected attributes.
 
 The table and totals use every matching SQL row. To keep the browser responsive, the interactive map draws at most the first 500 matching polygons and states this limit below the map.
 
@@ -188,13 +188,13 @@ bar chart: x = Age, y = Sum of Acres
 
 This distinction matters because stands have different areas. Counting rows would give every stand equal weight and would not reproduce the supervisor's “Sum of Acres by Age” example.
 
-The result also provides a way to diagnose the reported age bias: unusually tall acreage bars show ages that were assigned to disproportionately large areas. Canopy visualizes that issue; it does not claim to correct the Leto/FIA sampling bias.
+The result also provides a way to diagnose the reported age bias: unusually tall acreage bars show ages that were assigned to disproportionately large areas. PANDA visualizes that issue; it does not claim to correct the Leto/FIA sampling bias.
 
 ## Change 5: using the complete TreeMap raster package
 
 ### Files being used
 
-Canopy uses the complete directory under `rasters/TreeMap_2022/`:
+PANDA uses the complete directory under `rasters/TreeMap_2022/`:
 
 ```text
 TreeMap_2022.tif              actual categorical raster cells
@@ -228,7 +228,7 @@ For a question such as:
 Visualize the TreeMap raster for stands older than 60
 ```
 
-Canopy:
+PANDA:
 
 1. runs the age filter in SQLite;
 2. collects distinct `TM_Value` codes from the matching rows;
@@ -256,7 +256,7 @@ The model is not used as a replacement for the database:
 Question -> constrained query -> verified SQL result -> Qwen explanation
 ```
 
-For FVS data, the deterministic parser and SQLite perform the filter. Qwen receives only the question, applied filters, verified summary figures, and limited composition counts. If Ollama is unavailable, Canopy can still execute SQL and produce a deterministic summary, chart, and map.
+For FVS data, the deterministic parser and SQLite perform the filter. Qwen receives only the question, applied filters, verified summary figures, and limited composition counts. If Ollama is unavailable, PANDA can still execute SQL and produce a deterministic summary, chart, and map.
 
 ### Fixing the command-not-found problem
 
@@ -331,7 +331,7 @@ The completed checks verify:
 
 Say:
 
-> Canopy is not training a new forestry model. It is a local knowledge and analysis layer over existing inventory, simulation, and spatial data.
+> PANDA is not training a new forestry model. It is a local knowledge and analysis layer over existing inventory, simulation, and spatial data.
 
 ### 2. Prove the SQL integration
 
@@ -375,8 +375,8 @@ Explain that the stand is found through `MU_ID`, while its related raster cells 
 
 ### 6. Prove persistence
 
-Open a previous chat, restart Canopy, and show that the question and reconstructed result remain available.
+Open a previous chat, restart PANDA, and show that the question and reconstructed result remain available.
 
 ## Concise statement of contribution
 
-> My main contribution was changing Canopy from a temporary CSV demonstration into a reproducible local data system. I added a real SQLite query layer and proof view, persistent chat history, realistic FVS stand and shapefile support, a validated link to the complete TreeMap raster package, natural-language charts and maps, local Qwen integration, automated verification, and maintainable Docusaurus documentation. The result is a system where the language model improves usability, but the forestry data, SQL, and spatial joins remain inspectable and defensible.
+> My main contribution was changing PANDA from a temporary CSV demonstration into a reproducible local data system. I added a real SQLite query layer and proof view, persistent chat history, realistic FVS stand and shapefile support, a validated link to the complete TreeMap raster package, natural-language charts and maps, local Qwen integration, automated verification, and maintainable Docusaurus documentation. The result is a system where the language model improves usability, but the forestry data, SQL, and spatial joins remain inspectable and defensible.

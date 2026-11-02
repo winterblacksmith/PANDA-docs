@@ -2,17 +2,17 @@
 id: implementation-walkthrough
 title: 2. Implementation walkthrough
 slug: /implementation-walkthrough
-description: A supervisor-ready explanation of how PANDA evolved from CSV and JSON files into a local SQL and spatial-data knowledge base.
+description: How PANDA evolved from CSV and JSON files into a reproducible SQL and spatial-data application.
 sidebar_position: 2
 ---
 
 # 2. Implementation walkthrough
 
-This section explains the changes made to PANDA, why each change was needed, how it was implemented, and how to demonstrate that it works. It is written so it can be used as the basis of a supervisor presentation.
+This walkthrough explains how PANDA works, why its main components were added, and how to check the results. Start with the short explanation, then follow the implementation details and examples to explore the code and data.
 
-## Short explanation for a supervisor
+## Short explanation
 
-> I started PANDA as a question-answering interface over CSV and JSON files. That was useful for prototyping, but the data was loaded into memory for each run, query behavior was difficult to prove, and chat history existed only in the current Streamlit session. I changed the architecture so tabular data is synchronized into a local SQLite database and questions are converted into constrained, parameterized SQL queries. I then added persistent SQLite chat tables, imported realistic FVS stand outputs with their complete shapefile, and connected those stands to a packaged TreeMap raster through `TM_Value`. PANDA can now return evidence as SQL results, acreage-weighted charts, stand polygons, and matching raster cells while using a local Qwen model only to interpret or explain verified data.
+PANDA helps people explore forestry data by asking questions. It started as an interface over CSV and JSON files and now uses SQLite, a database stored in a local file, to query data and save conversations. Supported questions become parameterized SQL queries: the query structure is controlled, and filter values are supplied separately. FVS stand records connect to polygon boundaries and a TreeMap raster, a grid of mapped values, through shared identifiers. PANDA can show results as tables, acreage charts, stand maps, and matching raster cells. A Qwen language model can explain verified results when the model connection is available.
 
 ## Before and after
 
@@ -132,7 +132,7 @@ This exact reload test was performed with “Chart the sum of acres by age.”
 
 ### What was imported
 
-The supervisor's ZIP contains both the attribute table and the parts of one ESRI shapefile:
+The supplied FVS data package contains both the attribute table and the parts of one ESRI shapefile:
 
 ```text
 FVS_output_07222026.csv       queryable stand attributes
@@ -172,7 +172,7 @@ When a map is requested, PANDA collects the matching `MU_ID` values, reads those
 
 The table and totals use every matching SQL row. To keep the browser responsive, the interactive map draws at most the first 500 matching polygons and states this limit below the map.
 
-## Change 4: producing the supervisor's age distribution
+## Change 4: calculating acreage by stand age
 
 The requested chart is not a count of stands. It is an area-weighted distribution:
 
@@ -186,7 +186,7 @@ sum Acres within each Age
 bar chart: x = Age, y = Sum of Acres
 ```
 
-This distinction matters because stands have different areas. Counting rows would give every stand equal weight and would not reproduce the supervisor's “Sum of Acres by Age” example.
+This distinction matters because stands have different areas. Counting rows would give every stand equal weight; summing `Acres` shows how much land falls into each age group.
 
 The result also provides a way to diagnose the reported age bias: unusually tall acreage bars show ages that were assigned to disproportionately large areas. PANDA visualizes that issue; it does not claim to correct the Leto/FIA sampling bias.
 
@@ -290,7 +290,7 @@ A Docusaurus website was added under `docs-site/`. It contains:
 - SQL and chat-persistence architecture; and
 - local setup instructions.
 
-The documentation reuses the supervisor's example maps and age chart as scientific figures. TypeScript checking and a production Docusaurus build are part of verification.
+The documentation includes example maps and an age chart to illustrate the results. TypeScript checking and a production Docusaurus build are part of verification.
 
 ## File-by-file summary
 
@@ -325,15 +325,13 @@ The completed checks verify:
 - `qwen2.5:3b` generates a local response; and
 - Docusaurus passes TypeScript and production-build checks.
 
-## Suggested supervisor demonstration
+## Try it step by step
 
-### 1. Establish the purpose
+### 1. Understand the purpose
 
-Say:
+PANDA queries and visualizes existing inventory, simulation, and spatial data. Its language model helps explain results; the project does not train a new forestry model.
 
-> PANDA is not training a new forestry model. It is a local knowledge and analysis layer over existing inventory, simulation, and spatial data.
-
-### 2. Prove the SQL integration
+### 2. Inspect a SQL query
 
 Ask:
 
@@ -341,9 +339,9 @@ Ask:
 Show stands older than 60 with TCuFt above 3000
 ```
 
-Open **SQL and data proof** and show the SQL text and separately bound values.
+Open **SQL and data proof** to inspect the SQL text and separately bound values. Compare the filters with the question you asked.
 
-### 3. Reproduce the requested chart
+### 3. Create an acreage chart
 
 Ask:
 
@@ -351,9 +349,9 @@ Ask:
 Chart the sum of acres by age
 ```
 
-Explain that the y-axis is summed stand acreage rather than the number of rows.
+The y-axis shows summed stand acreage rather than the number of rows.
 
-### 4. Prove the vector join
+### 4. Explore stand polygons
 
 Ask:
 
@@ -361,9 +359,9 @@ Ask:
 Map old hardwood stands
 ```
 
-Hover over polygons and point out that `MU_ID` is the stand identity used for the join.
+Hover over a polygon to inspect its attributes. `MU_ID` identifies the stand and connects its table row to its boundary on the map.
 
-### 5. Prove the raster join
+### 5. Explore matching raster cells
 
 Ask:
 
@@ -371,12 +369,12 @@ Ask:
 Visualize the TreeMap raster for MU_ID 4
 ```
 
-Explain that the stand is found through `MU_ID`, while its related raster cells are found through `TM_Value`.
+PANDA finds the stand through `MU_ID` and its related raster cells through `TM_Value`. These identifiers serve different purposes and are not interchangeable.
 
-### 6. Prove persistence
+### 6. Check saved conversations
 
-Open a previous chat, restart PANDA, and show that the question and reconstructed result remain available.
+When running locally, open a previous chat, restart PANDA, and check that the question and reconstructed result remain available. On Railway, retaining chats across restarts requires persistent storage for the SQLite database.
 
-## Concise statement of contribution
+## What the implementation provides
 
-> My main contribution was changing PANDA from a temporary CSV demonstration into a reproducible local data system. I added a real SQLite query layer and proof view, persistent chat history, realistic FVS stand and shapefile support, a validated link to the complete TreeMap raster package, natural-language charts and maps, local Qwen integration, automated verification, and maintainable Docusaurus documentation. The result is a system where the language model improves usability, but the forestry data, SQL, and spatial joins remain inspectable and defensible.
+PANDA combines a SQLite query layer, visible query evidence, saved conversations, FVS stand and shapefile support, TreeMap raster joins, charts, maps, and optional Qwen explanations. The documentation and verification tools help contributors understand and check these components. The data, queries, and spatial joins remain available for inspection rather than relying on generated prose alone.

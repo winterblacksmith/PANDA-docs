@@ -66,11 +66,11 @@ Chart acres by composition
 How many mature coniferous stands are there?
 ```
 
-For the supervisor's requested age distribution, PANDA groups by exact `Age` and sums `Acres`. This reproduces the intended “Sum of Acres by Age” calculation rather than counting stands.
+To show acreage by stand age, PANDA groups by exact `Age` and sums `Acres`. This answers how much land belongs to each age group rather than how many stands it contains.
 
 ![Supplied sum-of-acres-by-age example](/img/sum-acres-by-age.png)
 
-## What the supervisor's data adds
+## What this dataset adds
 
 This package materially advances PANDA because it provides a realistic bridge from stand simulation to spatial decision support:
 

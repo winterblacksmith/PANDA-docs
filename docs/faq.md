@@ -2,6 +2,8 @@
 id: faq
 title: Frequently asked questions
 description: Answers about using PANDA, saved chats, model connections, and deployment.
+last_update:
+  date: 2026-11-25
 ---
 
 # Frequently asked questions
@@ -12,29 +14,69 @@ Open [PANDA](https://perseus-panda.up.railway.app/) to analyze data and [the doc
 
 ## What can I ask PANDA?
 
-Choose a dataset in the sidebar, then use its example questions as a starting point. Supported operations depend on the dataset: inventory summaries, constrained SQL filters, FVS acreage and volume charts, stand polygons, and TreeMap overlays. See [FVS and TreeMap](./data/fvs-treemap.md) for field meanings and spatial limitations.
+Open **Dataset library** in the sidebar, press **Analyze** on a dataset, then use its example questions as a starting point. Supported operations depend on the dataset: inventory summaries, constrained SQL filters, FVS acreage and volume charts, stand polygons, and TreeMap overlays. See [FVS and TreeMap](./data/fvs-treemap.md) for field meanings and spatial limitations.
 
 ## Is the language model the source of the numbers?
 
-Deterministic SQL and spatial operations calculate supported results. The language model can help interpret or explain them. Check **SQL and data proof** and the displayed filters before relying on a result; generated prose can still be wrong.
+No. SQL and spatial code calculate the results, and the model writes the answer from them. PANDA checks every number in the answer against the calculated results and asks the model to correct any mismatch. Generated wording can still be misleading, so check the displayed filters and the developer details (three-dots menu) before relying on a result, and use the flag button when something looks off.
 
-## Why does PANDA say model answers are unavailable?
+## Which AI model answers my question?
 
-The application can be healthy while its model server is unreachable or a model is missing. Open **Model connection** in the sidebar and run **Test model connection**. The test checks the model list and requests a short generated answer. A model name in a dropdown alone does not prove inference works.
+PANDA tries Groq first, then Google Gemini, then the local Qwen model, and uses
+the first that answers. **Model connection** in the sidebar shows the order;
+**Test model connection** sends a real request and names the provider that
+answered and any that failed first.
+
+## Why does PANDA say "AI answer unavailable right now"?
+
+No model provider answered (missing API keys, free-tier quota used up, or the
+local model unreachable). PANDA then shows its verified result without AI
+wording. Run **Test model connection** to see which provider failed and why.
+
+## What does the circle in the top-right corner show?
+
+How much of today's free-tier model quota is used. Hover over it for requests
+and tokens used, the daily limit, and what is left per provider. Quotas reset at
+midnight Pacific (3 AM Eastern).
+
+## How do I report a wrong or strange answer?
+
+Press the flag icon under the answer, choose what looks off and add a note.
+Flags are saved for reviewers, who can download them from **Model connection**.
+
+## Is my data sent to an outside service?
+
+When Groq or Gemini answers, the question, a dataset profile (column names,
+ranges, common values) and query results are sent to that provider; raw dataset
+files are not. Gemini's free tier allows Google to use prompts to improve its
+products. See [Language models](./overview.md#language-models).
 
 ## Is FastAPI running inside the Railway PANDA service?
 
-The checked GitHub application branch, `railway/pdf-reports-model-connection`, starts Streamlit from its Dockerfile and uses the Ollama client with `OLLAMA_HOST`. It does not include a FastAPI gateway or read `PANDA_INFERENCE_URL` and `PANDA_INFERENCE_TOKEN`.
-
-The [Irene/FastAPI guide](./deployment/irene-ollama-fastapi.md) describes a separate gateway architecture. Its runtime health must be checked independently; a successful Railway `/_stcore/health` check proves only that Streamlit responds. Pointing the Ollama client at a gateway also requires compatible Ollama routes and any required authentication handling.
+No. The FastAPI gateway runs on Irene in front of Ollama. The Railway app reads
+`PANDA_INFERENCE_URL` and `PANDA_INFERENCE_TOKEN` and calls it as the local
+fallback once UGA approves a secure route from Railway to Irene. A healthy
+Railway `/_stcore/health` check proves only that Streamlit responds. See the
+[Irene/FastAPI guide](./deployment/irene-ollama-fastapi.md).
 
 ## Does PANDA still work without the model?
 
-Supported deterministic dataset summaries, filters, tables, charts, and maps can remain available. Open-ended AI answers require a working model connection; not every natural-language question has a deterministic fallback.
+Yes, with plain wording. Tables, charts, maps and verified summaries still work and are labelled as not AI-written. Open-ended conversation needs a working model.
 
 ## Are chats saved?
 
-PANDA stores chat history in SQLite. Persistent Railway storage is required to retain that database across redeployments. See [SQL and saved chats](./architecture/sql-chat.md). Clearing a chat removes its saved content, so export anything you need first.
+Yes, in SQLite under `/app/storage` on Railway. A Railway volume must be attached there, or chats are lost on every redeploy. Chats are currently shared by everyone using the app (there is no sign-in yet), so do not enter private information. Clearing a chat removes it; download the PDF report first if you need it. See [SQL and saved chats](./architecture/sql-chat.md).
+
+## How do I add my own dataset?
+
+Open **Dataset library**, upload the files under **Add datasets**, and press
+**Add to library**. Upload an FVS CSV together with its `.shp`, `.shx` and `.dbf`
+to enable stand maps. See [Dataset library and storage](./data/dataset-library.md).
+
+## Why did my theme reset?
+
+It should not anymore: the theme is saved in the page address (for example
+`?theme=Light`). Bookmark that address to keep your choice.
 
 ## Why do some file names still say canopy?
 

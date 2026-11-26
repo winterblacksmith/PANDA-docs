@@ -2,44 +2,55 @@
 id: railway
 title: Railway application deployment
 description: Connect the hosted PANDA interface to its private inference gateway.
+last_update:
+  date: 2026-11-25
 ---
 
 # Railway application deployment
 
-> **Integration status:** The checked Railway application branch starts Streamlit and connects through the Ollama client using `OLLAMA_HOST`. The gateway variables below describe the separate gateway integration target; that branch does not yet read them. A healthy Streamlit endpoint does not confirm gateway or model readiness.
+Railway hosts PANDA's public-facing application. Model answers come from Groq
+or Google Gemini (free tiers) first, with the Irene gateway as the fallback once
+UGA approves a secure route. Tables, charts and maps keep working without a model.
 
-Railway hosts PANDA's public-facing application. The application can still provide deterministic SQL and spatial results when the model is unavailable, but natural-language generation requires the Irene gateway.
-
-## Required application variables
+## Application variables
 
 | Variable | Purpose |
 |---|---|
-| `PANDA_INFERENCE_URL` | HTTPS address of the FastAPI gateway |
+| `GROQ_API_KEY` | Enables Groq. Seal it in Railway. |
+| `GEMINI_API_KEY` | Enables Gemini. Seal it in Railway. |
+| `PANDA_LLM_PROVIDERS` | Optional order, e.g. `groq,gemini,local` or `local` only |
+| `PANDA_INFERENCE_URL` | HTTPS address of the Irene FastAPI gateway (when approved) |
 | `PANDA_INFERENCE_TOKEN` | Shared bearer token accepted by the gateway |
-| `PANDA_OLLAMA_MODEL` | Model name, currently `qwen2.5:3b` |
-| `STREAMLIT_SERVER_ADDRESS` | Normally `0.0.0.0` on Railway |
-| `STREAMLIT_SERVER_PORT` | Railway-provided port or application default |
+| `PANDA_OLLAMA_MODEL` | Local model name, currently `qwen2.5:3b` |
+| `PANDA_STORAGE_DIR` | `/app/storage` (set in the Dockerfile) |
+| `PANDA_GROQ_DAILY_REQUESTS`, `PANDA_GEMINI_DAILY_REQUESTS` | Optional daily limits shown in the usage indicator |
 
 Do not place secret values in screenshots, documentation, source code, or commit history.
+
+## Persistent storage (required)
+
+Attach a **volume** to the PANDA service with mount path `/app/storage`. It
+holds saved chats, flags, uploaded datasets and usage counts. Without it,
+everything resets on each redeploy; the Dataset library shows a warning when no
+volume is detected.
 
 ## Connection flow
 
 ```text
 Railway PANDA app
-  -> HTTPS request + bearer token
-  -> Irene FastAPI gateway
-  -> private Ollama container
-  -> qwen2.5:3b response
+  -> Groq API (HTTPS, API key)          first choice
+  -> Google Gemini API (HTTPS, API key) if Groq fails or is rate limited
+  -> Irene FastAPI gateway (HTTPS + bearer token) -> private Ollama -> qwen2.5:3b
 ```
 
 ## Deployment check
 
-1. Confirm the Railway service is healthy.
-2. Confirm the inference variables exist without displaying their values.
-3. Confirm the Irene gateway health endpoint responds through HTTPS.
-4. Ask a general question that cannot be answered by a canned dataset response.
-5. Check that PANDA reports the remote model as available.
+1. Confirm the Railway service is healthy and the volume is attached at `/app/storage`.
+2. Confirm the provider variables exist without displaying their values.
+3. Open **Model connection** and run **Test model connection**; it names the provider that answered.
+4. Ask a general question, then a data question, and check both answers are model-written.
+5. Hover the usage circle to confirm requests are being counted.
 
 ## Failure behavior
 
-If the gateway cannot be reached, PANDA should show a clear model-unavailable message and continue offering deterministic dataset summaries, SQL queries, charts, and maps.
+If every provider fails, PANDA labels the answer "AI answer unavailable right now" and continues offering verified dataset summaries, SQL queries, charts, and maps.

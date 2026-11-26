@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'PANDA documentation',
   tagline: 'PERSEUS AI for Natural-language Data Analysis',
-  favicon: 'img/canopy-leaf.svg',
+  favicon: 'img/panda-bamboo.svg',
   future: {v4: true},
   url: process.env.DOCS_URL ?? 'https://panda-docs.up.railway.app',
   baseUrl: process.env.DOCS_BASE_URL ?? '/',
@@ -19,6 +19,8 @@ const config: Config = {
       docs: {
         sidebarPath: './sidebars.ts',
         editUrl: 'https://github.com/winterblacksmith/PANDA-docs/edit/main/',
+          // Each page shows the date in its last_update front matter (no git history needed at build time).
+          showLastUpdateTime: true,
         routeBasePath: 'docs',
       },
       blog: false,
@@ -30,7 +32,7 @@ const config: Config = {
     colorMode: {defaultMode: 'light', disableSwitch: false, respectPrefersColorScheme: true},
     navbar: {
       title: 'PANDA',
-      logo: {alt: 'PANDA forestry AI', src: 'img/canopy-leaf.svg'},
+      logo: {alt: 'PANDA bamboo mark', src: 'img/panda-bamboo.svg'},
       items: [
         {type: 'docSidebar', sidebarId: 'pandaSidebar', position: 'left', label: 'Documentation'},
         {to: '/docs/faq', label: 'FAQ', position: 'left'},

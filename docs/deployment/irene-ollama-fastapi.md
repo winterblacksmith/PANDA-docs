@@ -2,6 +2,8 @@
 id: irene-ollama-fastapi
 title: Irene, Ollama, and FastAPI
 description: Operate the GPU-backed Qwen service on Irene.
+last_update:
+  date: 2026-11-25
 ---
 
 # Irene, Ollama, and FastAPI
@@ -9,6 +11,13 @@ description: Operate the GPU-backed Qwen service on Irene.
 > **Integration status:** This guide describes a separate gateway architecture. The checked Railway application branch (`railway/pdf-reports-model-connection`) starts Streamlit and uses the Ollama client through `OLLAMA_HOST`; it does not contain this gateway or read the `PANDA_INFERENCE_URL`/token settings. Gateway runtime health and application integration must be verified independently.
 
 Irene provides the GPU compute used by PANDA. The current target model is `qwen2.5:3b`, served by Ollama inside Docker. A separate FastAPI gateway validates requests before forwarding them to Ollama.
+
+:::note Status (Nov 25, 2026)
+The gateway and Qwen2.5:3b run on Irene, but Railway cannot reach them until UGA
+approves a secure HTTPS route (reverse proxy or Cloudflare Tunnel). Until then the
+deployed app uses Groq and Gemini, with Irene as the fallback. See
+[Model providers](../architecture/model-providers.md).
+:::
 
 ## Services
 

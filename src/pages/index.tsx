@@ -8,7 +8,7 @@ const flow = [
   ['01', 'Ask', 'A natural-language forestry question'],
   ['02', 'Calculate', 'Parameterized SQLite and spatial operations'],
   ['03', 'Verify', 'Tables, totals, charts, maps, and query proof'],
-  ['04', 'Explain', 'Qwen turns verified results into clear language'],
+  ['04', 'Explain', 'Groq, Gemini or local Qwen writes the answer from verified results'],
   ['05', 'Remember', 'Conversation history persists in SQLite'],
 ];
 
@@ -23,7 +23,7 @@ export default function Home(): ReactNode {
               <Heading as="h1">PANDA documentation</Heading>
               <p className={styles.lede}>
                 Learn how PANDA combines forestry datasets, reproducible SQL, spatial analysis,
-                persistent conversations, and a locally hosted language model.
+                persistent conversations, and language models that write answers from verified results.
               </p>
               <div className={styles.actions}>
                 <Link className="button button--primary button--lg" to="/docs/overview">Start here</Link>
@@ -52,7 +52,7 @@ export default function Home(): ReactNode {
           <div className="container">
             <Heading as="h2">Project guides</Heading>
             <div className={styles.guideGrid}>
-              <article><div className={styles.guideMark}>SYS</div><Heading as="h3">Architecture</Heading><p>See how the application, SQLite, spatial tools, FastAPI, Ollama, and Qwen fit together.</p><Link to="/docs/architecture/system-overview">Read the architecture →</Link></article>
+              <article><div className={styles.guideMark}>SYS</div><Heading as="h3">Architecture</Heading><p>See how the application, SQLite, spatial tools, the model router (Groq, Gemini, local Qwen) and the Irene gateway fit together.</p><Link to="/docs/architecture/system-overview">Read the architecture →</Link></article>
               <article><div className={styles.guideMark}>GPU</div><Heading as="h3">Deployment</Heading><p>Operate the Irene inference service and connect it securely to the Railway application.</p><Link to="/docs/deployment/irene-ollama-fastapi">Read the deployment guide →</Link></article>
               <article><div className={styles.guideMark}>END</div><Heading as="h3">Handoff</Heading><p>Use the final checklist to transfer ownership, validate the system, and plan the next phase.</p><Link to="/docs/handoff/project-handoff">Read the handoff guide →</Link></article>
             </div>

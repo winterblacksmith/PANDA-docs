@@ -4,9 +4,17 @@ title: 2. Implementation walkthrough
 slug: /implementation-walkthrough
 description: How PANDA evolved from CSV and JSON files into a reproducible SQL and spatial-data application.
 sidebar_position: 2
+last_update:
+  date: 2026-11-25
 ---
 
 # 2. Implementation walkthrough
+
+:::note
+Changes 1–7 describe the August–October 2026 work, when PANDA ran only a local
+Qwen model. Change 8 covers the November 2026 release (v1.1). For a dated list of
+every change, see the [release notes](./release-notes.md).
+:::
 
 This walkthrough explains how PANDA works, why its main components were added, and how to check the results. Start with the short explanation, then follow the implementation details and examples to explore the code and data.
 
@@ -291,6 +299,35 @@ A Docusaurus website was added under `docs-site/`. It contains:
 - local setup instructions.
 
 The documentation includes example maps and an age chart to illustrate the results. TypeScript checking and a production Docusaurus build are part of verification.
+
+## Change 8: hosted models, dataset library and interface refresh (November 2026, v1.1)
+
+**Why.** Railway could not reach the Qwen model on Irene until UGA approves a
+secure route, so the deployed app had no working model. Testing also showed the
+model did not know what the selected dataset contained, several answers were
+fixed templates, uploads were lost on redeploy, and the interface was hard to
+read in places.
+
+**What changed.**
+
+- Model routing tries Groq, then Gemini, then local Qwen, with per-model
+  fallbacks, cooldowns after rate limits, and an honest error when all fail.
+- A usage indicator shows requests and tokens used, the daily limit, and what
+  is left.
+- The model receives a profile of the selected dataset and PANDA's verified
+  results, and writes every answer; numbers are checked against the results.
+- A dataset library replaces the import menu; uploads are stored on persistent
+  storage with their companion files.
+- Each answer has a flag button for wrong or strange output.
+- PDF reports render tables and lists correctly and name the model used.
+- Interface: darker Forest theme, floating prompt bar, message icons, top-right
+  usage and download buttons, version label, theme remembered across refreshes,
+  bamboo browser icon.
+
+**How to demonstrate.** Ask "summarize the data" on an inventory CSV, hover the
+usage circle, flag the answer, then download the PDF report. Details are in
+[Model providers](./architecture/model-providers.md) and
+[Dataset library](./data/dataset-library.md).
 
 ## File-by-file summary
 

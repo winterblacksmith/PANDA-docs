@@ -2,6 +2,8 @@
 id: sql-chat
 title: SQL integration and saved chat history
 description: How PANDA proves local SQLite use and persists conversations.
+last_update:
+  date: 2026-11-25
 ---
 
 # SQL integration and saved chat history
@@ -56,6 +58,20 @@ chat_messages
 The selected dataset is part of the chat key, so inventory, raster, and FVS conversations remain separate. Each `message_blob` is a compressed serialized message containing its role, text, and—where applicable—the structured FVS query result specification. When PANDA starts, it reloads those messages from SQLite. When an old FVS chat is opened, PANDA reruns the stored specification and reconstructs its table, chart, polygon map, or raster overlay.
 
 This design avoids storing large dataframes or image blobs inside chat history while preserving a reproducible record of what was asked and how it was answered.
+
+## Where the database lives
+
+`canopy.sqlite` is inside `PANDA_STORAGE_DIR` (`storage/` locally, `/app/storage`
+on Railway). On Railway that folder must be a mounted **volume**; otherwise every
+redeploy starts empty. Nothing is stored on Irene. The same database holds
+`response_flags` (answers users flagged). Model usage counts are in
+`llm_usage.sqlite` in the same folder.
+
+:::caution Chats are shared between visitors
+Chats are keyed by dataset only, not by user, so everyone using the deployed app
+sees the same history for a dataset. Per-user chats need sign-in and an owner
+column on `chat_conversations` (planned). Do not enter private information.
+:::
 
 ## What proves persistence
 
